@@ -62,7 +62,11 @@ let explosionFragments = 40;
 let points = 0;
 let level = 1;
 let record = 0;
-let gameOver = false;
+let gameOver = true;
+let run = false;
+let start = false;
+let playAgain = false;
+let createStartButton = false;
 
 window.onload = function() {
   screen = document.getElementById('screen');
@@ -80,11 +84,12 @@ window.onload = function() {
   aliensImg.src = "./assets/alien1.png";
 
   createStars();
-  createAliens();
+  // createAliens();
 
   setInterval(moveShip, 25);
   setInterval(aliensAnimation, 400);
   setInterval(decideEnemyAttack, 1000);
+  setInterval(createStartButtonFunc, 3000);
 
   requestAnimationFrame(update);
 
@@ -110,6 +115,26 @@ function update() {
   requestAnimationFrame(update);
   context.clearRect(0, 0, screen.width, screen.height);
 
+  updateStars();
+
+  if(!gameOver) {
+    context.drawImage(shipImg, ship.x, ship.y, ship.width, ship.height)
+  } 
+
+  updateAliens();
+  updateShoots();
+  updateEnemiesAttacks();
+  updateExplosions();
+
+  if (gameOver) {
+    context.font = "bold 60px seriff";
+    context.fillStyle = "red";
+    context.fillText("Game Over", 10, screen.height / 2);
+  }
+
+}
+
+function updateStars() {
   for (let i = 0; i < starsArray.length; i ++) {
     let stars = starsArray[i];
     stars.y += starsDisplacementY;
@@ -122,16 +147,29 @@ function update() {
     context.fillStyle = stars.color;
     context.fillRect(stars.x, stars.y, stars.width, stars.height);
   }
+}
 
-  if(!gameOver) {
-    context.drawImage(shipImg, ship.x, ship.y, ship.width, ship.height)
-  } 
-
+function updateAliens() {
   for (let i = 0; i < aliensArray.length; i++) {
     let aliens = aliensArray[i];
     if (aliens.active) {
       aliens.x = gridX + aliens.forX;
       aliens.y = gridY + aliens.forY;
+
+      if (aliens.active && !gameOver && checkColision(aliens, ship)) {
+        aliens.active = false;
+        gameOver = true;
+        run = false;
+        createStartButton = false;
+        createExplosion(ship.x, ship.y, "orange", 99);
+      }
+
+      if (aliens.y > screen.height && !gameOver) {
+        gameOver = true;
+        run = false;
+        createStartButton = false;
+        createExplosion(ship.x, ship.y, "orange", 99);
+      }
 
       if (aliensMovement) {
         aliensImg.src = "./assets/alien3.png"
@@ -143,12 +181,17 @@ function update() {
     }
   }
 
-  gridX += aliensDisplacementX;
-  if (gridX + gridWidth >= screen.width || gridX <= 0) {
-    aliensDisplacementX = -aliensDisplacementX;
-    gridY += aliensHeight / 2;
-  } 
+  if (start) {
+    gridX += aliensDisplacementX;
+    if (gridX + gridWidth >= screen.width || gridX <= 0) {
+      aliensDisplacementX = -aliensDisplacementX;
+      gridY += aliensHeight / 2;
+    } 
+  }
+ 
+}
 
+function updateShoots() {
   for (let i = 0; i < shootsArray.length; i ++) {
     let shoots = shootsArray[i];
     shoots.y += shootsDisplacementY;
@@ -173,21 +216,9 @@ function update() {
   while (shootsArray.length > 0 && (shootsArray[0].used || shootsArray[0].y < 0)) {
     shootsArray.shift();
   }
+}
 
-  for (let i = 0; i < enemiesAttaksArray.length; i++) {
-    let attackEnemy = enemiesAttaksArray[i];
-    attackEnemy.y += enemiesAttaksDisplacementY;
-
-    context.fillStyle = "orchid";
-    context.fillRect(attackEnemy.x, attackEnemy.y, attackEnemy.width, attackEnemy.height);
-
-    if (!(attackEnemy.used) && checkColision(attackEnemy, ship)) {
-      attackEnemy.used = true;
-      gameOver = true;
-      createExplosion(ship.x, ship.y, "orange", 99);
-    }
-  }
-
+function updateEnemiesAttacks() {
   for (let i = 0; i < explosionsArray.length; i++) {
     let explosion = explosionsArray[i];
     explosion.x += explosion.displacementX;
@@ -197,17 +228,28 @@ function update() {
     context.fillStyle = explosion.color;
     context.fillRect(explosion.x, explosion.y, explosion.width, explosion.height);
   }
+}
+
+function updateExplosions() {
+  for (let i = 0; i < enemiesAttaksArray.length; i++) {
+    let attackEnemy = enemiesAttaksArray[i];
+    attackEnemy.y += enemiesAttaksDisplacementY;
+
+    context.fillStyle = "orchid";
+    context.fillRect(attackEnemy.x, attackEnemy.y, attackEnemy.width, attackEnemy.height);
+
+    if (!(attackEnemy.used) && checkColision(attackEnemy, ship) && !(gameOver)) {
+      attackEnemy.used = true;
+      gameOver = true;
+      run = false;
+      createStartButton = false;
+      createExplosion(ship.x, ship.y, "orange", 99);
+    }
+  }
 
   while (explosionsArray.length > 0 && explosionsArray[0].countDown <= 0) {
     explosionsArray.shift();
   }
-
-  if (gameOver) {
-    context.font = "bold 60px seriff";
-    context.fillStyle = "red";
-    context.fillRect("Game Over", 10, screen.height / 2);
-  }
-
 }
 
 function moveShip() {
@@ -239,6 +281,7 @@ function createStars() {
 }
 
 function openFire() {
+  if (gameOver) return;
   ship.direction = 0;
 
   let shoots = {
@@ -349,5 +392,36 @@ function levelComplete() {
   gridHeight = aliensHeight * aliensRows;
   aliensArray.splice(0, aliensArray.length);
   createAliens();
-  return true
+  return true;
+}
+
+function createStartButtonFunc() {
+  if (createStartButton) return false;
+
+  startButton = document.createElement("button");
+  startButton.style.width = "318px";
+  startButton.style.height = "50px";
+  startButton.style.marginTop = "1px";
+  startButton.style.fontSize = "32px";
+  startButton.style.fontWeight = "700";
+  startButton.style.color = "yellow";
+  startButton.style.backgroundColor = "seagreen";
+  startButton.innerText = "Comenzar";
+  document.body.children[0].appendChild(startButton);
+  startButton.addEventListener("click", startGameFunc);
+
+  createStartButton = true;
+}
+
+function startGameFunc() {
+  if (run) return false;
+
+  if (playAgain) location.reload();
+
+  run = true;
+  gameOver = false;
+  start = true;
+  playAgain = true;
+  createAliens();
+  document.body.children[0].removeChild(startButton);
 }
