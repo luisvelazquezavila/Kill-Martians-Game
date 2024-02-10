@@ -1,0 +1,52 @@
+body {
+	font-family: 'sans-serif', cursive, monospace;
+	/*text-align: center;*/
+}
+
+button {
+	width: 320px;
+	height: 40px;
+	border-radius: 0.15em;
+	font-size: 28px;
+	font-weight: 700;
+	color: #FFFF00;
+	background-color: #3369FF;
+	box-shadow: inset 0 -0.5em 0 -0.35em rgba(0, 0, 0, 0.17);
+	text-align: center;
+	position: relative;
+}
+
+.botonesControl {
+	width: 105px;
+	height: 50px;
+	border-radius: 0.15em;
+	font-size: 24px;
+	font-weight: 700;
+	color: #101010;
+	background-color: #909090;
+	box-shadow: inset 0 -0.5em 0 -0.35em rgba(0, 0, 0, 0.17);
+	text-align: center;
+	position: relative;
+}
+.botonesControl:active {
+	top: 0.1em;
+}
+
+.botonMarcador {
+	width: 103px;
+	height: 30px;
+	border-radius: 0.10em;
+	font-size: 12px;
+	font-weight: 700;
+	color: #FFFFFF;
+	background-color: red;
+	box-shadow: inset 0 -0.5em 0 -0.35em rgba(0, 0, 0, 0.17);
+	text-align: center;
+	position: relative;
+}
+
+#pantalla {
+	background-color: black;
+
+}
+
