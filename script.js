@@ -67,6 +67,10 @@ let run = false;
 let start = false;
 let playAgain = false;
 let createStartButton = false;
+let backgroundMusic = true;
+
+let gameSound = document.createElement("audio");
+gameSound.src = "./assets/choujikuu-yousai-macross-nes-music-stage-them_z2InWttD.mp3";
 
 window.onload = function() {
   screen = document.getElementById('screen');
@@ -84,12 +88,11 @@ window.onload = function() {
   aliensImg.src = "./assets/alien1.png";
 
   createStars();
-  // createAliens();
 
-  setInterval(moveShip, 25);
+  setInterval(moveShip, 30);
   setInterval(aliensAnimation, 400);
   setInterval(decideEnemyAttack, 1000);
-  setInterval(createStartButtonFunc, 3000);
+  setInterval(createStartButtonFunc, 1000);
 
   requestAnimationFrame(update);
 
@@ -231,6 +234,7 @@ function updateEnemiesAttacks() {
 }
 
 function updateExplosions() {
+
   for (let i = 0; i < enemiesAttaksArray.length; i++) {
     let attackEnemy = enemiesAttaksArray[i];
     attackEnemy.y += enemiesAttaksDisplacementY;
@@ -243,7 +247,12 @@ function updateExplosions() {
       gameOver = true;
       run = false;
       createStartButton = false;
+      backgroundMusic = false;
       createExplosion(ship.x, ship.y, "orange", 99);
+      let explosionSound = document.createElement("audio");
+      explosionSound.src = "./assets/sonido-de-explosio_21t4cys2.mp3";
+      explosionSound.play();
+      gameSound.pause();
     }
   }
 
@@ -283,6 +292,10 @@ function createStars() {
 function openFire() {
   if (gameOver) return;
   ship.direction = 0;
+
+  let shootSound = document.createElement("audio");
+  shootSound.src = "./assets/sonido-de-blaster-star-wars-para-notificacione_hN4ynfW0.mp3";
+  shootSound.play();
 
   let shoots = {
     x: ship.x + ship.width / 2,
@@ -420,8 +433,14 @@ function startGameFunc() {
 
   run = true;
   gameOver = false;
-  start = true;
   playAgain = true;
+  start = true;
   createAliens();
   document.body.children[0].removeChild(startButton);
+
+  if(backgroundMusic) {
+    setInterval(() => {
+      gameSound.play();
+    }, 0);
+  }
 }
