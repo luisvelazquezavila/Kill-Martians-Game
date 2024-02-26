@@ -1,7 +1,7 @@
 // Space Invadres
 
-let BSX = 32;
-let BSY = 32;
+let BSX = 30;
+let BSY = 30;
 let ROWS = 14;
 let COLUMNS = 10;
 let NumOfStars = 90;
@@ -62,15 +62,17 @@ let explosionFragments = 40;
 let points = 0;
 let level = 1;
 let record = 0;
+let recordToStorage = JSON.parse(localStorage.getItem("record"));
+record = recordToStorage;
 let gameOver = true;
 let run = false;
 let start = false;
 let playAgain = false;
 let createStartButton = false;
-let backgroundMusic = true;
 
 let gameSound = document.createElement("audio");
 gameSound.src = "./assets/choujikuu-yousai-macross-nes-music-stage-them_z2InWttD.mp3";
+gameSound.setAttribute("loop", "");
 
 window.onload = function() {
   screen = document.getElementById('screen');
@@ -111,7 +113,9 @@ window.onload = function() {
   levelIndicator = document.getElementById("btn-level");
   levelIndicator.innerText += " " + level.toString();
 
-  recordIndicator = document.getElementById("btn-points");
+  recordIndicator = document.getElementById("btn-record");
+  recordIndicator.innerText += " " + recordToStorage.toString();
+  
 }
 
 function update() {
@@ -130,7 +134,7 @@ function update() {
   updateExplosions();
 
   if (gameOver) {
-    context.font = "bold 60px seriff";
+    context.font = "bold 55px seriff";
     context.fillStyle = "red";
     context.fillText("Game Over", 10, screen.height / 2);
   }
@@ -165,6 +169,11 @@ function updateAliens() {
         run = false;
         createStartButton = false;
         createExplosion(ship.x, ship.y, "orange", 99);
+        explosionSoundFunc();
+        gameSound.pause();
+        setTimeout(() => {
+          if (playAgain) location.reload();
+        }, 3000); 
       }
 
       if (aliens.y > screen.height && !gameOver) {
@@ -172,6 +181,11 @@ function updateAliens() {
         run = false;
         createStartButton = false;
         createExplosion(ship.x, ship.y, "orange", 99);
+        explosionSoundFunc();
+        gameSound.pause();
+        setTimeout(() => {
+          if (playAgain) location.reload();
+        }, 3000); 
       }
 
       if (aliensMovement) {
@@ -210,8 +224,13 @@ function updateShoots() {
         numberAliens --;
         points ++;
         pointsScoreBoard.innerText = "Puntos: " + points.toString();
+        if (points > record) {
+          record = points;
+          localStorage.setItem("record", JSON.stringify(record));
+          recordIndicator.innerText = "Récord: " + record.toString();
+        }      
         createExplosion(alien.x, alien.y, "lightgreen", 25);
-        levelComplete();
+        levelComplete(); 
       }
     }
   }
@@ -246,13 +265,12 @@ function updateExplosions() {
       attackEnemy.used = true;
       gameOver = true;
       run = false;
-      createStartButton = false;
-      backgroundMusic = false;
       createExplosion(ship.x, ship.y, "orange", 99);
-      let explosionSound = document.createElement("audio");
-      explosionSound.src = "./assets/sonido-de-explosio_21t4cys2.mp3";
-      explosionSound.play();
+      explosionSoundFunc();
       gameSound.pause();
+      setTimeout(() => {
+        if (playAgain) location.reload();
+      }, 3000);    
     }
   }
 
@@ -292,11 +310,7 @@ function createStars() {
 function openFire() {
   if (gameOver) return;
   ship.direction = 0;
-
-  let shootSound = document.createElement("audio");
-  shootSound.src = "./assets/sonido-de-blaster-star-wars-para-notificacione_hN4ynfW0.mp3";
-  shootSound.play();
-
+  shootSoundFunc();
   let shoots = {
     x: ship.x + ship.width / 2,
     y: ship.y,
@@ -412,13 +426,12 @@ function createStartButtonFunc() {
   if (createStartButton) return false;
 
   startButton = document.createElement("button");
-  startButton.style.width = "318px";
+  startButton.style.width = "300px";
   startButton.style.height = "50px";
   startButton.style.marginTop = "1px";
-  startButton.style.fontSize = "32px";
+  startButton.style.fontSize = "28px";
   startButton.style.fontWeight = "700";
-  startButton.style.color = "yellow";
-  startButton.style.backgroundColor = "seagreen";
+  startButton.style.backgroundColor = "purple";
   startButton.innerText = "Comenzar";
   document.body.children[0].appendChild(startButton);
   startButton.addEventListener("click", startGameFunc);
@@ -428,19 +441,25 @@ function createStartButtonFunc() {
 
 function startGameFunc() {
   if (run) return false;
-
-  if (playAgain) location.reload();
-
+  // if (playAgain) location.reload();
   run = true;
   gameOver = false;
   playAgain = true;
   start = true;
   createAliens();
   document.body.children[0].removeChild(startButton);
+  gameSound.play();
+  // gameSound.play();
+}
 
-  if(backgroundMusic) {
-    setInterval(() => {
-      gameSound.play();
-    }, 0);
-  }
+function explosionSoundFunc() {
+  let explosionSound = document.createElement("audio");
+  explosionSound.src = "./assets/sonido-de-explosio_21t4cys2.mp3";
+  explosionSound.play();
+}
+
+function shootSoundFunc() {
+  let shootSound = document.createElement("audio");
+  shootSound.src = "./assets/sonido-de-blaster-star-wars-para-notificacione_hN4ynfW0.mp3";
+  shootSound.play();
 }
