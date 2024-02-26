@@ -5,6 +5,7 @@ body {
 	background-size: cover;
 	display: grid;
 	place-content: center;
+	height: 100vh;
 }
 
 button {
