@@ -2,7 +2,7 @@ body {
 	font-family: 'sans-serif', cursive, monospace;
 	background-image: url("assets/pexels-hristo-fidanov-1252890.jpg");
 	background-repeat: no-repeat;
-	background-size: cover;
+	background-size: auto;
 	display: grid;
 	place-content: center;
 	height: 100vh;
